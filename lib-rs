@@ -1,0 +1,23 @@
+#![feature(with_options)]
+use std::fs::{ File};
+use std::ffi::OsStr;
+use anyhow::{Context, Result};
+
+trait BinMgmt<S>
+    where S: AsRef<OsStr> + ?Sized 
+{
+    fn load(&mut self, src: &S) -> Result<()>;
+
+    fn dump(&mut self, src: &S) -> Result<()>;
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        assert_eq!(2 + 2, 4);
+    }
+}
