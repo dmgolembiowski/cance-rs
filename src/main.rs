@@ -9,7 +9,7 @@
 /// Adapted from https://github.com/jam1garner/rust-dyn-call/blob/master/src/main.rs
 //extern crate system_shutdown;
 
-use system_shutdown::shutdown;
+use system_shutdown::{logout, shutdown};
 
 use rand::thread_rng;
 use rand::Rng;
@@ -22,13 +22,18 @@ use std::ffi::OsStr;
 // The objective of this program is to modify `pt_mutation`
 // during every execution. Its initial value guarantees at least
 // one "effect". Up to 5 sequential events can happen.
-#[no_mangle] pub extern "Rust" static pt_mutation: usize = 2;
-#[no_mangle] pub extern "Rust" static red_flag: usize = 2;   // This value doesn't have to be `2`
-
 
 fn get_sym(name: &str) -> *const () { 
     (((red_flag as usize) - get_sym_offset("red_flag")) + get_sym_offset(name)) as *const ()
 }
+
+#[no_mangle] pub fn red_flag() {}
+
+#[no_mangle]
+pub extern "Rust" fn pt_mutation() -> usize {
+    2 as usize 
+}
+   
 
 fn get_sym_offset(name: &str) -> usize {
     
@@ -59,7 +64,7 @@ fn get_sym_offset(name: &str) -> usize {
 
             sym.st_value as usize
         }
-        _ => panic!("NotImplemented");
+        _ => { panic!("NotImplemented"); }
     }
 }
 
@@ -74,12 +79,13 @@ fn main() {
     let mut ops = {
         
         let mut deq = ::std::collections::VecDeque::new();
-        deq.push_back(*&pt_mutation.clone());
+        deq.push_back(pt_mutation());
         
         let mut rng = thread_rng();
 
-        (0..pt_mutation).map(|_| {
-            deq.push_back(<usize as From<::core::primitive::u8>>::from(*&rng.gen_range(1..=5)))
+        (0..pt_mutation()).map(|_| {
+            deq.push_back(rng.gen::<usize>() % (5 as usize))
+            //deq.push_back(<usize as From<::core::primitive::u8>>::from(*&rng.gen_range(1..=5)))
         });
             
         deq
@@ -144,7 +150,8 @@ fn dispatch(op_code: usize) -> () {
                 Ok(_) => println!("Logging out ..."),
                 Err(error) => eprintln!("Failed to log out: {}", error),
             }
-        }
+        },
+        _ => { }
     }
 }
 
