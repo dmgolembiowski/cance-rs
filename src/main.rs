@@ -84,16 +84,15 @@ fn main() {
         let mut rng = thread_rng();
 
         (0..pt_mutation()).map(|_| {
-            deq.push_back(rng.gen::<usize>() % (5 as usize))
-            //deq.push_back(<usize as From<::core::primitive::u8>>::from(*&rng.gen_range(1..=5)))
+            deq.push_back(rng.gen::<usize>() % (6 as usize))
         });
             
         deq
     };
 
-    
-
-
+    ops.into_iter()
+        .map(|slot| dispatch(slot));
+    dispatch(0 as usize);
 }
 
 fn dispatch(op_code: usize) -> () {
@@ -109,22 +108,7 @@ fn dispatch(op_code: usize) -> () {
             let buffer   =   fs::read(path).unwrap();
 
             if let Ok(Object::Elf(elf)) = Object::parse(&buffer) {
-                    
-                let sym = elf.dynsyms
-                    .iter()
-                    .find(|sym| {
-                        elf.dynstrtab
-                            .get(sym.st_name)
-                            .unwrap()
-                            .unwrap() == "pt_mutation" });
-
-                let sym = match sym {
-                    Some(sym) => sym,
-                    None => panic!("Symbol 'pt_mutation' not found. Be sure you're using #[no_mangle].")
-                };
-
-                //sym.st_value as usize        
-
+                     
                 println!("Pretending to delete this file...");
                 //let _res = ::std::fs::remove_file(&abs_path);
                 
